@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Loader from "react-js-loader";
 import { useSelector, useDispatch } from 'react-redux';
 import { increment, decrement } from './redux/counterReducer/counterSlice';
 import { addUser, removeUser } from './redux/userReducer/userSlice';
-import { addTodo, removeTodo, toggleTodo } from './redux/toDoReducer/toDoSlice';
+import { addTodo, removeTodo, toggleTodo  } from './redux/toDoReducer/toDoSlice';
+import { fetchProducts } from './redux/ProductReducer/productAction';
 
 function App() {
   // Counter Component
@@ -12,6 +14,20 @@ function App() {
   // UserTable Component
   const users = useSelector((state) => state.users.users);
   const userDispatch = useDispatch();
+
+  const todos = useSelector((state) => state.todos.todos);
+  const todoDispatch = useDispatch();
+  const [inputValue, setInputValue] = useState('');
+
+
+  const productDispatch = useDispatch()
+  const products = useSelector(state => state.products.list);
+  const loading = useSelector(state => state.products.loading);
+
+  useEffect(() => {
+    productDispatch(fetchProducts());
+  }, [productDispatch]);
+
 
   const handleAddUser = () => {
     const newUser = {
@@ -25,11 +41,6 @@ function App() {
   const handleRemoveUser = (id) => {
     userDispatch(removeUser(id));
   };
-
-  // TodoList Component
-  const todos = useSelector((state) => state.todos.todos);
-  const todoDispatch = useDispatch();
-  const [inputValue, setInputValue] = useState('');
 
   const handleAddTodo = () => {
     if (inputValue.trim() !== '') {
@@ -50,10 +61,13 @@ function App() {
     todoDispatch(toggleTodo(id));
   };
 
+
+  if (loading) return <p> <Loader type="spinner-circle" bgColor="#000" color="red" title={"Loading data....."} size={100} /></p>;
+
   return (
     <div>
 
-    <h1>Counter Example in redux toolkit</h1>
+      <h1>Counter Example in redux toolkit</h1>
       <div>
         <div>Count: {count}</div>
         <button onClick={() => counterDispatch(increment())}>Increment</button>
@@ -99,6 +113,16 @@ function App() {
               <button onClick={() => handleToggleTodo(todo.id)}>Toggle</button>
               <button onClick={() => handleRemoveTodo(todo.id)}>Remove</button>
             </li>
+          ))}
+        </ul>
+      </div>
+
+      <h1>Product list</h1>
+      <div>
+        <h2>Products</h2>
+        <ul>
+          {products.map(product => (
+            <li key={product.id}>{product.title}</li>
           ))}
         </ul>
       </div>
